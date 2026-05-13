@@ -20,13 +20,12 @@ Battleships Solitaire (hay Bimaru) là dạng câu đố logic: đặt hạm đ�
 
 | | |
 |---|---|
-| 🔍 | Giải tự động bằng Backtracking — chạy hoàn toàn offline |
-| ⚡ | Giải bằng ILP/GLPK — chính xác, hiệu quả hơn với đề lớn |
+| 🔍 | Giải tự động bằng Backtracking — chạy hoàn toàn offline - hoạt động tốt từ 6x6 đến 20x20 |
+| 📐 | Giải bằng ILP/GLPK  hiệu quả hơn với đề lớn - cần mạng cho lần đầu để tải thư viện |
 | ✏️ | Tạo đề thủ công hoặc đặt tàu ngẫu nhiên |
 | 🎯 | Chọn ô gợi ý (given) linh hoạt theo slider |
-| 📸 | Scan đề từ ảnh chụp màn hình bằng Ctrl+V |
+| 📸 | Scan đề từ ảnh chụp màn hình bằng Ctrl+V - hỗ trợ với bảng từ 6x6 đến 30x30 |
 | 🔎 | Thu phóng bảng tùy ý |
-| 📐 | Hỗ trợ bảng từ 5×5 đến 26×26 |
 
 ---
 
