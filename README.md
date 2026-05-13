@@ -44,14 +44,14 @@ BattleshipsSolitaire-Solver/
 │   ├── scan_server.py  # FastAPI server
 │   ├── detector.py     # Nhận diện ảnh (OpenCV + Tesseract)
 │   ├── requirements.txt
-│   └── Dockerfile
-├── templates/          # Ảnh mẫu dùng cho tính năng scan
-│   ├── single.png
-│   ├── mid.png
-│   ├── up.png
-│   ├── down_2.png
-│   ├── left_2.png
-│   └── right.png
+│   ├── Dockerfile
+|   └──templates/          # Ảnh mẫu dùng cho tính năng scan
+│     ├── single.png
+│     ├── mid.png
+│     ├── up.png
+│     ├── down_2.png
+│     ├── left_2.png
+│     └── right.png
 └── README.md
 ```
 
