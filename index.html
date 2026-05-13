@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleships Solver & Creator </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h2> 🚢 Battleships </h2>
+
+    <div class="mode-tabs">
+        <button class="tab-btn active" id="tab-solve" onclick="switchMode('solve')">🔍 Chế độ Giải</button>
+        <button class="tab-btn" id="tab-create" onclick="switchMode('create')">✏️ Chế độ Tạo Đề</button>
+        <button class="tab-btn" id="tab-scan" onclick="switchMode('scan')">📸 Scan đề</button>
+    </div>
+
+    <!-- SOLVE PANEL  -->
+    <div id="panel-solve" class="mode-panel">
+        <div class="controls">
+            <div class="control-group" style="flex:0.5">
+                <label>Kích thước (N):</label>
+                <input type="number" id="gridSize" value="10" min="5" max="26" onchange="initSolveMode()">
+            </div>
+            <div class="control-group">
+                <label>Nhập Hàng (cách nhau dấu cách):</label>
+                <input type="text" id="rowHints" placeholder="vd: 1 2 0 3 ..." oninput="syncHints()">
+            </div>
+            <div class="control-group">
+                <label>Nhập Cột (cách nhau dấu cách):</label>
+                <input type="text" id="colHints" placeholder="vd: 0 2 1 3 ..." oninput="syncHints()">
+            </div>
+        </div>
+        <div class="zoom-controls">
+            <label style="margin:0">🔍 Thu/Phóng:</label>
+            <button class="zoom-btn" onclick="adjustZoom(-0.1,'solve')">−</button>
+            <input type="range" id="zoomSlider" min="0.4" max="1.5" step="0.1" value="1" oninput="applyZoom('solve')">
+            <button class="zoom-btn" onclick="adjustZoom(0.1,'solve')">+</button>
+            <span id="zoomValue" style="font-weight:bold;width:45px">100%</span>
+        </div>
+        <div class="board-wrapper" id="boardArea"></div>
+        <div class="fleet-config">
+            <label style="font-size:15px;display:block;margin-bottom:10px">⚓ Cấu hình hạm đội:</label>
+            <div id="fleetContainer"></div>
+            <button onclick="addShipType()" style="margin-top:10px;background:#6c757d">+ Thêm loại tàu</button>
+        </div>
+        <!-- CHỌN SOLVER -->
+        <div style="display:flex;align-items:center;gap:12px;background:#f0f4ff;border:1px solid #c5d0f0;border-radius:8px;padding:10px 14px;margin-bottom:10px;flex-wrap:wrap">
+            <span style="font-weight:bold;font-size:14px;color:#444">⚙️ Solver:</span>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px">
+                <input type="radio" name="solverMode" value="bt" checked onchange="setSolver('bt')">
+                 Backtracking <span style="color:#888;font-size:12px">(offline)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px">
+                <input type="radio" name="solverMode" value="ilp" onchange="setSolver('ilp')">
+                 ILP / GLPK <span style="color:#888;font-size:12px">(cần mạng)</span>
+            </label>
+            <span id="ilpNote" style="display:none;font-size:12px;color:#e65c00;background:#fff3e0;padding:3px 8px;border-radius:5px;border:1px solid #ffcc80">
+                 ILP cần tải thư viện từ CDN lần đầu
+            </span>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:stretch">
+            <button id="solveBtn" class="solve-btn" onclick="startSolve()" style="flex:1">▶ Giải Bảng Tự Động</button>
+            <button id="cancelBtn" onclick="cancelSolve()" style="background:#dc3545;padding:15px 20px;font-size:16px;font-weight:bold;display:none">⏹ Hủy</button>
+            <button onclick="resetBoard()" style="background:#6c757d;padding:15px 20px;font-size:16px;font-weight:bold">↺ Reset</button>
+        </div>
+        <div id="solverTimerBox" style="display:none" class="timer-box">
+            <span class="timer-label">⏱ Thời gian:</span>
+            <span id="solverTimerDisplay" class="timer-display">0.00s</span>
+        </div>
+        <div id="statusMessage"></div>
+    </div>
+
+    <!--  CREATE PANEL  -->
+    <div id="panel-create" class="mode-panel" style="display:none">
+
+        <div class="step-bar">
+            <div class="step-item">
+                <div class="step-circle" id="sc1">1</div>
+                <div class="step-label">Chọn hạm đội</div>
+            </div>
+            <div class="step-line" id="sl12"></div>
+            <div class="step-item">
+                <div class="step-circle" id="sc2">2</div>
+                <div class="step-label">Đặt tàu</div>
+            </div>
+            <div class="step-line" id="sl23"></div>
+            <div class="step-item">
+                <div class="step-circle" id="sc3">3</div>
+                <div class="step-label">Chọn Given</div>
+            </div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div id="createStep1">
+            <div class="step-panel-title">Bước 1 — Cấu hình hạm đội &amp; kích thước bảng</div>
+            <div class="controls" style="margin-bottom:15px">
+                <div class="control-group" style="flex:0.5">
+                    <label>Kích thước bảng (N):</label>
+                    <input type="number" id="createGridSize" value="10" min="5" max="26">
+                </div>
+            </div>
+            <div class="fleet-config" style="margin-bottom:0">
+                <label style="font-size:15px;display:block;margin-bottom:10px">⚓ Số lượng tàu:</label>
+                <div id="createFleetEditor"></div>
+                <button onclick="addCreateShipType()" style="margin-top:10px;background:#6c757d">+ Thêm loại tàu</button>
+            </div>
+            <div style="margin-top:18px;text-align:right">
+                <button onclick="goToStep2()" class="solve-btn" style="width:auto;padding:12px 32px;font-size:16px">
+                    Tiếp theo: Đặt tàu →
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="createStep2" style="display:none">
+            <div class="step-panel-title">Bước 2 — Đặt tàu vào bảng</div>
+            <div class="zoom-controls">
+                <label style="margin:0">🔍 Thu/Phóng:</label>
+                <button class="zoom-btn" onclick="adjustZoom(-0.1,'create')">−</button>
+                <input type="range" id="createZoomSlider" min="0.4" max="1.5" step="0.1" value="1" oninput="applyZoom('create')">
+                <button class="zoom-btn" onclick="adjustZoom(0.1,'create')">+</button>
+                <span id="createZoomValue" style="font-weight:bold;width:45px">100%</span>
+            </div>
+            <div class="create-fleet-status" id="createFleetStatus"></div>
+            <div class="board-wrapper" id="createBoardArea"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <button onclick="goToStep1()" style="background:#6c757d;flex:1;min-width:110px;padding:12px;font-size:14px">← Quay lại</button>
+                <button onclick="autoPlaceShips()" style="background:#17a2b8;flex:2;min-width:150px;padding:12px;font-size:14px">🎲 Đặt ngẫu nhiên</button>
+                <button onclick="clearCreateBoard()" style="background:#aaa;flex:1;min-width:100px;padding:12px;font-size:14px">↺ Xóa bảng</button>
+                <button id="goStep3Btn" onclick="goToStep3()" class="solve-btn" style="flex:2;min-width:180px;font-size:14px;padding:12px" disabled>
+                    Chọn Given →
+                </button>
+            </div>
+            <div id="createStatusMessage" style="text-align:center;margin-top:10px;font-weight:bold;color:#555;min-height:20px"></div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="createStep3" style="display:none">
+            <div class="step-panel-title">Bước 3 — Chọn Given cho người giải</div>
+
+            <div class="zoom-controls">
+                <label style="margin:0">🔍 Thu/Phóng:</label>
+                <button class="zoom-btn" onclick="adjustZoom(-0.1,'given')">−</button>
+                <input type="range" id="givenZoomSlider" min="0.4" max="1.5" step="0.1" value="1" oninput="applyZoom('given')">
+                <button class="zoom-btn" onclick="adjustZoom(0.1,'given')">+</button>
+                <span id="givenZoomValue" style="font-weight:bold;width:45px">100%</span>
+            </div>
+
+            <div class="given-box">
+                <div class="given-box-title">🎲 Chọn given ngẫu nhiên (ô tàu)</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+                    <span style="font-size:13px;color:#666">Ít</span>
+                    <input type="range" id="givenCountSlider" min="0" max="30" value="5" style="flex:1;min-width:100px" oninput="onGivenSliderChange()">
+                    <span style="font-size:13px;color:#666">Nhiều</span>
+                    <strong id="givenCountLabel" style="min-width:24px;text-align:center">5</strong>
+                    <button onclick="applyRandomGiven()" style="background:#17a2b8;padding:6px 14px;font-size:13px">Áp dụng</button>
+                    <button onclick="clearAllGiven()" style="background:#6c757d;padding:6px 12px;font-size:13px">Xóa tất cả</button>
+                </div>
+                <div id="givenDiffLabel" style="font-size:12px;color:#888;margin-top:4px"></div>
+            </div>
+
+            <div class="given-legend">
+                <span class="leg"><span class="leg-dot" style="background:#343a40"></span>Ô tàu — click để lộ/ẩn</span>
+                <span class="leg"><span class="leg-dot" style="background:#a0d8ef"></span>Ô nước — click để thêm obstacle</span>
+                <span class="leg"><span class="leg-dot" style="background:#ff9800;border:2px solid #e65c00"></span>Given tàu đang chọn</span>
+                <span class="leg"><span class="leg-dot" style="background:#87ceeb;border:2px solid #007bff"></span>Obstacle đang chọn</span>
+            </div>
+
+            <div class="board-wrapper" id="givenBoardArea"></div>
+
+            <div id="givenStats" style="text-align:center;font-size:14px;color:#555;margin-bottom:12px"></div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button onclick="goToStep2FromGiven()" style="background:#6c757d;flex:1;min-width:110px;padding:12px;font-size:14px">← Quay lại</button>
+                <button onclick="exportToPuzzle()" class="solve-btn" style="flex:2;min-width:180px;font-size:15px;padding:12px">
+                    ➡ Chuyển sang Chế độ Giải
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /panel-create -->
+</div><!-- /container -->
+
+<!-- ===================== SCAN PANEL ===================== -->
+<div id="panel-scan" class="mode-panel" style="display:none">
+    <h3>📸 Scan đề từ ảnh</h3>
+    <div class="controls">
+        <div class="control-group" style="flex:0.5">
+            <label>Kích thước bảng (N):</label>
+            <select id="scanGridSize">
+                <option value="6">6</option>
+                <option value="8">8</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+            </select>
+        </div>
+    </div>
+    <!-- HƯỚNG DẪN + ẢNH VÍ DỤ -->
+    <div style="background:#f0f7ff; border:1px solid #b8d4f5; border-radius:8px; padding:14px 16px; margin-bottom:14px;">
+        <strong style="color:#0056b3;">📋 Hướng dẫn:</strong>
+        <ol style="margin:8px 0 0 18px; color:#333; font-size:14px; line-height:1.8;">
+            <li>Chụp ảnh màn hình bảng Battleships (có thể từ game, PDF, hoặc ảnh chụp)</li>
+            <li><strong> Ảnh phải bao gồm TOÀN BỘ bảng</strong> và <strong>đầy đủ chữ số đầu mỗi cột & hàng</strong></li>
+            <li>Nhấn <strong>Ctrl+V</strong> để dán ảnh từ clipboard vào vùng bên dưới</li>
+            <li>Chọn đúng <strong>kích thước bảng</strong> (N)</li>
+            <li>Nhấn <strong>"Scan và chuyển sang Giải"</strong> để nhận diện</li>
+            <li>Kiểm tra lại kết quả và nhấn <strong>Giải</strong> để tìm đáp án</li>
+        </ol>
+        
+        <!-- Ví dụ minh họa -->
+        <div style="margin-top:12px; text-align:center;">
+            <p style="color:#666; font-size:13px; margin-bottom:6px;">📷 <strong>Ví dụ ảnh chụp đúng:</strong> (có đủ số hàng bên trái, số cột bên trên, và toàn bộ ô bảng)</p>
+            <img src="templates/example.png" alt="Ví dụ ảnh scan" style="max-width:100%; max-height:250px; border:2px solid #dee2e6; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+        </div>
+    </div>
+    <!-- Vùng dán ảnh -->
+    <div id="scanPasteArea" onclick="triggerPasteFromClipboard()"
+         style="border:2px dashed #90b4d4;border-radius:10px;padding:28px 20px;text-align:center;
+                cursor:pointer;background:#f0f7ff;margin-bottom:14px;transition:background 0.2s;position:relative;">
+        <div id="scanPastePlaceholder" style="color:#5585a8;font-size:15px;pointer-events:none">
+            📋 <strong>Nhấn Ctrl+V</strong> để dán ảnh từ clipboard<br>
+            <span style="font-size:12px;color:#88a">(hoặc click vào đây rồi Ctrl+V)</span>
+        </div>
+        <img id="scanPreview" style="max-height:200px;display:none;border-radius:6px;margin-top:8px;" />
+        <button id="scanClearBtn" onclick="clearScanImage(event)"
+                style="display:none;position:absolute;top:8px;right:10px;background:#dc3545;color:#fff;
+                       border:none;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:13px;">✕ Xóa</button>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:15px">
+        <button onclick="startScan()" class="solve-btn" style="flex:1">🔍 Scan và chuyển sang Giải</button>
+    </div>
+    <div id="scanStatus" style="text-align:center;margin-top:4px;font-weight:bold;color:#555;"></div>
+</div>
+<!-- Solvers -->
+<script src="solver_bt.js"></script>
+<script src="solver_ilp.js"></script>
+<script src="ui.js"></script>
+</body>

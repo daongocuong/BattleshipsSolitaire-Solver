@@ -1,0 +1,132 @@
+/* ===== BASE ===== */
+body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; display:flex; flex-direction:column; align-items:center; background:#f0f2f5; padding:20px; margin:0; }
+.container { background:white; padding:25px; border-radius:12px; box-shadow:0 8px 16px rgba(0,0,0,.1); max-width:1000px; width:100%; }
+h2 { text-align:center; margin-top:0; color:#333; }
+
+/* ===== TABS ===== */
+.mode-tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid #e9ecef; }
+.tab-btn { padding:10px 22px; border:none; background:transparent; font-size:15px; font-weight:bold; color:#6c757d; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; border-radius:6px 6px 0 0; transition:all .2s; }
+.tab-btn:hover { background:#f8f9fa; color:#333; }
+.tab-btn.active { color:#007bff; border-bottom-color:#007bff; background:#f0f7ff; }
+
+/* ===== CONTROLS ===== */
+.controls { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:20px; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #e9ecef; }
+.control-group { display:flex; flex-direction:column; flex:1; min-width:200px; }
+label { font-weight:bold; margin-bottom:6px; font-size:13px; color:#495057; }
+input[type="text"], input[type="number"] { padding:10px; border:1px solid #ced4da; border-radius:6px; font-size:14px; font-family:monospace; transition:border-color .2s; }
+input[type="text"]:focus, input[type="number"]:focus { outline:none; border-color:#007bff; box-shadow:0 0 0 3px rgba(0,123,255,.1); }
+
+/* ===== BOARD ===== */
+.board-wrapper { display:flex; justify-content:flex-start; margin-bottom:15px; overflow-x:auto; padding-bottom:10px; }
+.game-layout { display:flex; flex-direction:column; align-items:flex-start; }
+.layout-row { display:flex; align-items:center; width:100%; }
+.spacer-left { width:68px; flex-shrink:0; }
+.spacer-right { width:33px; flex-shrink:0; }
+.h-group { display:grid; gap:1px; }
+.v-group { display:grid; gap:1px; width:30px; }
+.v-hints { width:35px; margin-right:3px; }
+.coord-cell { display:flex; justify-content:center; align-items:center; color:#9aa0a6; font-size:12px; font-weight:500; user-select:none; }
+.hint-cell { display:flex; justify-content:center; align-items:center; font-size:18px; font-weight:bold; color:#000; transition:color .3s; }
+.hint-cell.dim { color:#ced4da; }
+
+/* ===== MAIN BOARD CELLS ===== */
+.board-container { border:3px solid #202124; display:grid; gap:1px; background:#5f6368; box-shadow:0 4px 6px rgba(0,0,0,.05); user-select:none; }
+.cell { background:white; width:35px; height:35px; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:background-color .1s; }
+.cell.empty.cross-highlight { background:#e8eaed; }
+.cell.empty:hover { background:#d1d5db !important; }
+.cell.water { background:#a0d8ef; }
+.cell.water-marked { background:#e0f7fa; color:#00bcd4; font-weight:bold; font-size:16px; }
+.cell.obstacle { background:#87ceeb; }
+.ship-part { background:black; position:absolute; }
+.cell.single .ship-part { width:25px; height:25px; border-radius:50%; }
+.cell.mid    .ship-part { width:25px; height:25px; }
+.cell.up     .ship-part { width:25px; height:30px; border-radius:12.5px 12.5px 0 0; top:5px; }
+.cell.down   .ship-part { width:25px; height:30px; border-radius:0 0 12.5px 12.5px; bottom:5px; }
+.cell.left   .ship-part { width:30px; height:25px; border-radius:12.5px 0 0 12.5px; left:5px; }
+.cell.right  .ship-part { width:30px; height:25px; border-radius:0 12.5px 12.5px 0; right:5px; }
+
+/* ===== FLEET CONFIG ===== */
+.fleet-config { margin-bottom:20px; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #e9ecef; }
+.fleet-item { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.fleet-item span { width:100px; font-weight:500; }
+
+/* ===== BUTTONS ===== */
+button { padding:8px 16px; cursor:pointer; background:#007bff; color:white; border:none; border-radius:6px; font-weight:bold; transition:background .2s, transform .1s; }
+button:hover { background:#0056b3; }
+button:disabled { background:#6c757d !important; cursor:not-allowed; opacity:.7; }
+button:active { transform:scale(.98); }
+button.small { padding:4px 10px; font-size:16px; }
+.btn-danger { background:#dc3545; }
+.btn-danger:hover { background:#c82333; }
+.solve-btn { width:100%; font-size:18px; padding:15px; background:#28a745; box-shadow:0 4px 6px rgba(40,167,69,.2); }
+.solve-btn:hover { background:#218838; }
+
+/* ===== ZOOM ===== */
+.zoom-controls { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:15px; background:#f8f9fa; padding:10px 20px; border-radius:8px; border:1px solid #e9ecef; }
+.zoom-btn { background:#6c757d; padding:4px 12px; font-size:20px; line-height:1; border-radius:4px; }
+.zoom-btn:hover { background:#5a6268; }
+
+/* ===== TIMER ===== */
+#statusMessage { text-align:center; margin-top:12px; font-weight:bold; color:#333; min-height:20px; }
+.timer-box { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:10px 20px; }
+.timer-label { font-size:15px; font-weight:bold; color:#856404; }
+.timer-display { font-size:24px; font-weight:bold; color:#856404; font-family:monospace; min-width:80px; }
+
+/* ===== STEP BAR ===== */
+.step-bar { display:flex; align-items:center; margin-bottom:20px; padding:0 10px; }
+.step-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.step-circle { width:34px; height:34px; border-radius:50%; border:2px solid #ced4da; background:white; color:#aaa; font-weight:bold; font-size:15px; display:flex; align-items:center; justify-content:center; transition:all .3s; }
+.step-circle.active { border-color:#007bff; background:#007bff; color:white; }
+.step-circle.done { border-color:#28a745; background:#28a745; color:white; }
+.step-label { font-size:12px; color:#6c757d; white-space:nowrap; font-weight:500; }
+.step-line { flex:1; height:2px; background:#ced4da; margin:0 6px; margin-bottom:16px; transition:background .3s; }
+.step-line.done { background:#28a745; }
+.step-panel-title { font-size:16px; font-weight:bold; color:#333; margin-bottom:15px; padding-bottom:8px; border-bottom:2px solid #e9ecef; }
+
+/* ===== CREATE STEP 2 ===== */
+.create-fleet-status { background:#f8f9fa; border:1px solid #e9ecef; border-radius:8px; padding:10px 15px; margin-bottom:12px; font-size:14px; color:#495057; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+/* Create board cells */
+.cell.cs-single .cp { width:25px; height:25px; border-radius:50%; background:#343a40; position:absolute; }
+.cell.cs-head-h .cp { width:30px; height:25px; border-radius:12px 2px 2px 12px; background:#343a40; position:absolute; left:5px; }
+.cell.cs-tail-h .cp { width:30px; height:25px; border-radius:2px 12px 12px 2px; background:#343a40; position:absolute; right:5px; }
+.cell.cs-mid-h  .cp, .cell.cs-mid-v .cp { width:29px; height:29px; border-radius:2px; background:#343a40; position:absolute; }
+.cell.cs-head-v .cp { width:25px; height:30px; border-radius:12px 12px 2px 2px; background:#343a40; position:absolute; top:5px; }
+.cell.cs-tail-v .cp { width:25px; height:30px; border-radius:2px 2px 12px 12px; background:#343a40; position:absolute; bottom:5px; }
+.cell.cwater { background:#c8e6f5 !important; color:#5599bb; font-size:13px; }
+.cell.drag-ok   { background:rgba(0,123,255,.18) !important; outline:2px dashed #007bff; outline-offset:-2px; }
+.cell.drag-bad  { background:rgba(220,53,69,.15) !important; outline:2px dashed #dc3545; outline-offset:-2px; }
+
+/* ===== STEP 3 GIVEN ===== */
+.given-box { background:#f0f7ff; border:1px solid #b8d4f5; border-radius:8px; padding:14px 16px; margin-bottom:14px; }
+.given-box-title { font-weight:bold; font-size:14px; color:#0056b3; margin-bottom:2px; }
+.given-legend { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:12px; font-size:13px; color:#555; align-items:center; }
+.leg { display:flex; align-items:center; gap:5px; }
+.leg-dot { width:16px; height:16px; border-radius:3px; display:inline-block; flex-shrink:0; }
+
+/* Given board cell overlays */
+.cell.gb-ship   { background:#343a40 !important; cursor:pointer; }
+.cell.gb-water  { background:#c8e6f5 !important; color:#5599bb; font-size:13px; cursor:pointer; }
+.cell.gb-given  { background:#ff9800 !important; outline:3px solid #e65c00; outline-offset:-3px; cursor:pointer; }
+.cell.gb-obstacle { background:#87ceeb !important; outline:3px solid #007bff; outline-offset:-3px; cursor:pointer; }
+
+/* Ship shapes inside given board */
+.cell.gb-ship   .cp, .cell.gb-given .cp { background:white; opacity:.55; }
+.cell.gb-given  .cp { opacity:.7; }
+.cell.gb-ship.gs-single .cp { width:22px; height:22px; border-radius:50%; position:absolute; }
+.cell.gb-ship.gs-head-h .cp,.cell.gb-given.gs-head-h .cp { width:28px; height:22px; border-radius:10px 2px 2px 10px; position:absolute; left:4px; }
+.cell.gb-ship.gs-tail-h .cp,.cell.gb-given.gs-tail-h .cp { width:28px; height:22px; border-radius:2px 10px 10px 2px; position:absolute; right:4px; }
+.cell.gb-ship.gs-mid-h  .cp,.cell.gb-given.gs-mid-h  .cp,
+.cell.gb-ship.gs-mid-v  .cp,.cell.gb-given.gs-mid-v  .cp { width:27px; height:27px; border-radius:2px; position:absolute; }
+.cell.gb-ship.gs-head-v .cp,.cell.gb-given.gs-head-v .cp { width:22px; height:28px; border-radius:10px 10px 2px 2px; position:absolute; top:4px; }
+.cell.gb-ship.gs-tail-v .cp,.cell.gb-given.gs-tail-v .cp { width:22px; height:28px; border-radius:2px 2px 10px 10px; position:absolute; bottom:4px; }
+
+/* drag ghost */
+#dragGhost { position:fixed; pointer-events:none; z-index:9999; display:flex; gap:1px; opacity:.75; left:-999px; top:0; }
+.ghost-cell { width:35px; height:35px; background:#343a40; border-radius:4px; border:1px solid rgba(255,255,255,.3); }
+#dragGhost .ghost-cell:first-child { border-radius:12px 4px 4px 12px; }
+#dragGhost .ghost-cell:last-child  { border-radius:4px 12px 12px 4px; }
+#dragGhost .ghost-cell:only-child  { border-radius:50%; }
+#dragGhost.vert { flex-direction:column; }
+#dragGhost.vert .ghost-cell:first-child { border-radius:12px 12px 4px 4px; }
+#dragGhost.vert .ghost-cell:last-child  { border-radius:4px 4px 12px 12px; }
