@@ -1276,7 +1276,7 @@ async function startScan() {
     formData.append('grid_size', gridSize);
 
     try {
-        const response = await fetch('https://battleshipssolitaire-solver.onrender.com', {
+        const response = await fetch('https://battleshipssolitaire-solver.onrender.com/scan', {
             method: 'POST',
             body: formData
         });
@@ -1295,34 +1295,43 @@ async function startScan() {
 }
 
 function populateSolveFromScan(data, gridSize) {
+    // Set kích thước bảng
     document.getElementById('gridSize').value = gridSize;
+    
+    // Tạo lại bảng mới
     initSolveMode();
 
-    const rowHints = Array.isArray(data.row_hints) ? data.row_hints : Array(gridSize).fill(0);
-    const colHints = Array.isArray(data.col_hints) ? data.col_hints : Array(gridSize).fill(0);
-
-    document.getElementById('rowHints').value = rowHints.join(' ');
-    document.getElementById('colHints').value = colHints.join(' ');
+    // Điền gợi ý hàng/cột từ scan
+    document.getElementById('rowHints').value = data.row_hints.join(' ');
+    document.getElementById('colHints').value = data.col_hints.join(' ');
     syncHints();
 
+    // Lấy tất cả cell
     const cells = document.querySelectorAll('#boardArea .board-container .cell');
-
-    for (const ob of (data.obstacles || [])) {
+    
+    // Đặt obstacle (ô nước)
+    for (const ob of data.obstacles) {
         const idx = (ob.r - 1) * gridSize + (ob.c - 1);
-        if (cells[idx]) setCellState(ob.r - 1, ob.c - 1, cells[idx], 'obstacle');
+        setCellState(ob.r - 1, ob.c - 1, cells[idx], 'obstacle');
     }
-
+    
+    // Map type từ Python sang UI
     const typeMap = {
-        'Single': 'single', 'Mid': 'mid',
-        'Up': 'down',  'Down': 'up',
-        'Left': 'right', 'Right': 'left'
+        'Single': 'single',
+        'Mid': 'mid',
+        'Up': 'down',
+        'Down': 'up',
+        'Left': 'right',
+        'Right': 'left'
     };
-
-    for (const sh of (data.shapes || [])) {
+    
+    // Đặt các ô tàu với hướng tương ứng
+    for (const sh of data.shapes) {
         const idx = (sh.r - 1) * gridSize + (sh.c - 1);
-        if (cells[idx]) setCellState(sh.r - 1, sh.c - 1, cells[idx], typeMap[sh.type] || 'single');
+        setCellState(sh.r - 1, sh.c - 1, cells[idx], typeMap[sh.type]);
     }
 
+    // Fleet theo kích thước bảng
     const fleetBySize = {
         6:  [ { length:3, count:1 }, { length:2, count:2 }, { length:1, count:3 } ],
         8:  [ { length:4, count:1 }, { length:3, count:2 }, { length:2, count:3 }, { length:1, count:3 } ],
@@ -1335,6 +1344,7 @@ function populateSolveFromScan(data, gridSize) {
     fleet = fleetBySize[gridSize] || fleetBySize[10];
     renderFleetUI();
 
+    // Thông báo thành công và chuyển sang tab Solve
     document.getElementById('statusMessage').style.color = '#28a745';
     document.getElementById('statusMessage').innerText = '✅ Đã tải dữ liệu từ scan. Kiểm tra và nhấn Giải!';
     switchMode('solve');
