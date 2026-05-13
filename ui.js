@@ -26,7 +26,7 @@ let fleet = [
     { length:2, count:3 }, { length:1, count:4 }
 ];
 let solverWorker = null, solverTimerInterval = null, solverStartTime = 0;
-
+let savedGiven = null;
 /* ─────────── CREATE STATE ─────────── */
 let createFleet = [
     { length:4, count:1 }, { length:3, count:2 },
@@ -219,10 +219,24 @@ function addShipType() {
 function resetBoard() {
     const N = parseInt(document.getElementById('gridSize').value) || 10;
     const cells = document.querySelectorAll('#boardArea .board-container .cell');
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-        const cell = cells[r * N + c];
-        if (cell) setCellState(r, c, cell, 'empty');
+
+    if (savedGiven && savedGiven.length > 0) {
+        // Đã giải rồi → về trạng thái hint ban đầu
+        for (let r = 0; r < N; r++)
+            for (let c = 0; c < N; c++)
+                setCellState(r, c, cells[r * N + c], 'empty');
+        savedGiven.forEach(g => {
+            setCellState(g.r, g.c, cells[g.r * N + g.c], g.type);
+        });
+        savedGiven = null;
+    } else {
+        // Chưa giải → xóa hết
+        for (let r = 0; r < N; r++)
+            for (let c = 0; c < N; c++)
+                setCellState(r, c, cells[r * N + c], 'empty');
+        savedGiven = null;
     }
+
     document.getElementById('statusMessage').innerText = '';
 }
 
@@ -295,7 +309,7 @@ async function startSolve() {
             if (state !== 'empty' && state !== 'water-marked')
                 given.push({ r, c, type: state });
         }
-
+    savedGiven = given.map(g => ({ ...g }));
     // Chọn solver
     const solver = currentSolver === 'ilp' ? window.solverILP : window.solverBT;
     const solverName = solver ? solver.name : '???';
@@ -1276,7 +1290,7 @@ async function startScan() {
     formData.append('grid_size', gridSize);
 
     try {
-        const response = await fetch('https://battleshipssolitaire-solver.onrender.com/scan', {
+        const response = await fetch('http://localhost:8000/scan', {
             method: 'POST',
             body: formData
         });
@@ -1294,6 +1308,7 @@ async function startScan() {
     }
 }
 
+// Điền dữ liệu đã scan vào chế độ Solve
 function populateSolveFromScan(data, gridSize) {
     // Set kích thước bảng
     document.getElementById('gridSize').value = gridSize;
