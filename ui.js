@@ -1290,7 +1290,7 @@ async function startScan() {
     formData.append('grid_size', gridSize);
 
     try {
-        const response = await fetch('http://localhost:8000/scan', {
+        const response = await fetch('https://battleshipssolitaire-solver.onrender.com/scan', {
             method: 'POST',
             body: formData
         });
